@@ -17,10 +17,10 @@ export default function App() {
   const [currentLevel, setCurrentLevel] = useState<number>(1);
   const [levels, setLevels] = useState<Level[]>([
     { id: 1, title: 'Nhận Biết', description: 'Làm quen các phương tiện', unlocked: true, completed: false, stars: 0 },
-    { id: 2, title: 'Phân Loại', description: 'Đường bộ, thủy, không', unlocked: false, completed: false, stars: 0 },
-    { id: 3, title: 'Siêu Phân Loại', description: 'Nhiều phương tiện cùng lúc', unlocked: false, completed: false, stars: 0 },
-    { id: 4, title: 'Tìm Lỗi Sai', description: 'Sửa lại cho đúng nhé', unlocked: false, completed: false, stars: 0 },
-    { id: 5, title: 'Thử Thách', description: 'Ghi nhớ và phản xạ', unlocked: false, completed: false, stars: 0 },
+    { id: 2, title: 'Phân Loại', description: 'Đường bộ, thủy, không', unlocked: true, completed: false, stars: 0 },
+    { id: 3, title: 'Siêu Phân Loại', description: 'Nhiều phương tiện cùng lúc', unlocked: true, completed: false, stars: 0 },
+    { id: 4, title: 'Tìm Lỗi Sai', description: 'Sửa lại cho đúng nhé', unlocked: true, completed: false, stars: 0 },
+    { id: 5, title: 'Thử Thách', description: 'Ghi nhớ và phản xạ', unlocked: true, completed: false, stars: 0 },
   ]);
 
   const startLevel = (levelId: number) => {

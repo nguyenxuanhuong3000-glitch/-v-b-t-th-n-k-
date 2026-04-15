@@ -4,6 +4,7 @@ import { TransportItem, TransportType } from '../../types';
 import { TRANSPORT_DATA, CATEGORIES } from '../../constants';
 import TransportCard from '../TransportCard';
 import Mascot from '../Mascot';
+import { startListening } from '../../services/recognitionService';
 
 interface Level2Props {
   onComplete: (stars: number) => void;
@@ -13,6 +14,7 @@ export default function Level2({ onComplete }: Level2Props) {
   const [round, setRound] = useState(1);
   const [target, setTarget] = useState<TransportItem | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [isListening, setIsListening] = useState(false);
   const totalRounds = 5;
 
   useEffect(() => {
@@ -44,6 +46,34 @@ export default function Level2({ onComplete }: Level2Props) {
     }
   };
 
+  const handleVoiceAnswer = () => {
+    if (isListening || feedback) return;
+    
+    setIsListening(true);
+    startListening(
+      (text) => {
+        const normalizedText = text.toLowerCase();
+        let matchedType: TransportType | null = null;
+        
+        // Check all categories
+        (Object.keys(CATEGORIES) as TransportType[]).forEach(type => {
+          const catName = CATEGORIES[type].name.toLowerCase();
+          if (normalizedText.includes(catName)) {
+            matchedType = type;
+          }
+        });
+
+        if (matchedType) {
+          handleCategorySelect(matchedType);
+        } else {
+          setFeedback(`Bé vừa nói "${text}" à? Thử nói "Đường bộ", "Đường thủy"... nhé! 🎤`);
+          setTimeout(() => setFeedback(null), 2500);
+        }
+      },
+      () => setIsListening(false)
+    );
+  };
+
   if (!target) return null;
 
   return (
@@ -52,14 +82,28 @@ export default function Level2({ onComplete }: Level2Props) {
 
       <Mascot message={feedback || `Bạn ${target.name} này đi ở đâu nhỉ?`} mood={feedback?.includes('Đúng') ? 'excited' : feedback ? 'sad' : 'happy'} />
 
-      <motion.div
-        key={target.id}
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        className="z-20"
-      >
-        <TransportCard item={target} size="lg" disabled />
-      </motion.div>
+      <div className="flex items-center gap-12">
+        <motion.div
+          key={target.id}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="z-20"
+        >
+          <TransportCard item={target} size="lg" disabled />
+        </motion.div>
+
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={handleVoiceAnswer}
+          className={`
+            w-24 h-24 rounded-full flex items-center justify-center text-4xl shadow-lg transition-colors
+            ${isListening ? 'bg-red-500 animate-pulse' : 'bg-playful-purple'} text-white
+          `}
+        >
+          {isListening ? '🛑' : '🎤'}
+        </motion.button>
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
         {(['road', 'air', 'water', 'rail'] as TransportType[]).map((type) => (
@@ -78,6 +122,8 @@ export default function Level2({ onComplete }: Level2Props) {
           </motion.button>
         ))}
       </div>
+      
+      <p className="text-slate-500 font-medium">Bé có thể nhấn micro 🎤 và nói "Đường bộ", "Đường thủy"... để trả lời nhé!</p>
     </div>
   );
 }

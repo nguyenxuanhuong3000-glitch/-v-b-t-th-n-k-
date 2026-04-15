@@ -4,6 +4,7 @@ import { TransportItem } from '../../types';
 import { TRANSPORT_DATA } from '../../constants';
 import TransportCard from '../TransportCard';
 import Mascot from '../Mascot';
+import { startListening } from '../../services/recognitionService';
 
 interface Level1Props {
   onComplete: (stars: number) => void;
@@ -15,6 +16,7 @@ export default function Level1({ onComplete }: Level1Props) {
   const [options, setOptions] = useState<TransportItem[]>([]);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [score, setScore] = useState(0);
+  const [isListening, setIsListening] = useState(false);
 
   const totalRounds = 5;
 
@@ -52,6 +54,27 @@ export default function Level1({ onComplete }: Level1Props) {
     }
   };
 
+  const handleVoiceAnswer = () => {
+    if (isListening || feedback) return;
+    
+    setIsListening(true);
+    startListening(
+      (text) => {
+        console.log('Bé nói:', text);
+        const normalizedText = text.toLowerCase();
+        const targetName = target?.name.toLowerCase() || '';
+        
+        if (normalizedText.includes(targetName) || targetName.includes(normalizedText)) {
+          if (target) handleSelect(target);
+        } else {
+          setFeedback(`Bé vừa nói "${text}" à? Thử lại nhé! 🎤`);
+          setTimeout(() => setFeedback(null), 2000);
+        }
+      },
+      () => setIsListening(false)
+    );
+  };
+
   if (!target) return null;
 
   return (
@@ -63,8 +86,22 @@ export default function Level1({ onComplete }: Level1Props) {
 
       <Mascot message={feedback || `Đây là xe gì thế bé?`} mood={feedback?.includes('Giỏi') ? 'excited' : feedback ? 'sad' : 'happy'} />
 
-      <div className="bg-white/50 p-8 rounded-full shadow-inner">
-        <TransportCard item={target} size="lg" disabled />
+      <div className="flex items-center gap-8">
+        <div className="bg-white/50 p-8 rounded-full shadow-inner">
+          <TransportCard item={target} size="lg" disabled />
+        </div>
+        
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={handleVoiceAnswer}
+          className={`
+            w-24 h-24 rounded-full flex items-center justify-center text-4xl shadow-lg transition-colors
+            ${isListening ? 'bg-red-500 animate-pulse' : 'bg-playful-purple'} text-white
+          `}
+        >
+          {isListening ? '🛑' : '🎤'}
+        </motion.button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
@@ -78,6 +115,8 @@ export default function Level1({ onComplete }: Level1Props) {
           </button>
         ))}
       </div>
+      
+      <p className="text-slate-500 font-medium">Bé có thể nhấn vào nút micro 🎤 để trả lời bằng giọng nói nhé!</p>
     </div>
   );
 }

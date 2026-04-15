@@ -4,6 +4,7 @@ import { TransportItem } from '../../types';
 import { TRANSPORT_DATA } from '../../constants';
 import TransportCard from '../TransportCard';
 import Mascot from '../Mascot';
+import { startListening } from '../../services/recognitionService';
 
 interface Level5Props {
   onComplete: (stars: number) => void;
@@ -14,6 +15,7 @@ export default function Level5({ onComplete }: Level5Props) {
   const [target, setTarget] = useState<TransportItem | null>(null);
   const [options, setOptions] = useState<TransportItem[]>([]);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [isListening, setIsListening] = useState(false);
   const totalRounds = 5;
 
   useEffect(() => {
@@ -49,6 +51,26 @@ export default function Level5({ onComplete }: Level5Props) {
     }
   };
 
+  const handleVoiceAnswer = () => {
+    if (isListening || feedback) return;
+    
+    setIsListening(true);
+    startListening(
+      (text) => {
+        const normalizedText = text.toLowerCase();
+        const targetName = target?.name.toLowerCase() || '';
+        
+        if (normalizedText.includes(targetName) || targetName.includes(normalizedText)) {
+          if (target) handleSelect(target);
+        } else {
+          setFeedback(`Bé vừa nói "${text}" à? Thử nhìn bóng và đoán tên xe nhé! 🎤`);
+          setTimeout(() => setFeedback(null), 2500);
+        }
+      },
+      () => setIsListening(false)
+    );
+  };
+
   if (!target) return null;
 
   return (
@@ -57,15 +79,29 @@ export default function Level5({ onComplete }: Level5Props) {
 
       <Mascot message={feedback || `Bóng này là của xe nào nhỉ?`} mood={feedback?.includes('Tuyệt') ? 'excited' : feedback ? 'sad' : 'happy'} />
 
-      <div className="bg-slate-800 p-12 rounded-3xl shadow-2xl">
-        <motion.span
-          key={target.id}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-9xl filter brightness-0 invert grayscale"
+      <div className="flex items-center gap-12">
+        <div className="bg-slate-800 p-12 rounded-3xl shadow-2xl">
+          <motion.span
+            key={target.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-9xl filter brightness-0 invert grayscale"
+          >
+            {target.image}
+          </motion.span>
+        </div>
+
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={handleVoiceAnswer}
+          className={`
+            w-24 h-24 rounded-full flex items-center justify-center text-4xl shadow-lg transition-colors
+            ${isListening ? 'bg-red-500 animate-pulse' : 'bg-playful-purple'} text-white
+          `}
         >
-          {target.image}
-        </motion.span>
+          {isListening ? '🛑' : '🎤'}
+        </motion.button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -79,6 +115,8 @@ export default function Level5({ onComplete }: Level5Props) {
           </div>
         ))}
       </div>
+      
+      <p className="text-slate-500 font-medium">Bé có thể nhấn micro 🎤 và nói tên xe để trả lời nhé!</p>
     </div>
   );
 }
