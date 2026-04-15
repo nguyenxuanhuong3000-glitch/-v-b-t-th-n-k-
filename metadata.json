@@ -1,0 +1,6 @@
+{
+  "name": "Bé Học Giao Thông",
+  "description": "Ứng dụng giáo dục tương tác giúp trẻ mầm non (3-6 tuổi) học cách phân loại các phương tiện giao thông qua trò chơi vui nhộn.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["Game", "Education"]
+}

@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-sky-light: #e0f2fe;
+  --color-grass-green: #4ade80;
+  --color-sun-yellow: #facc15;
+  --color-ocean-blue: #3b82f6;
+  --color-road-gray: #4b5563;
+  --color-candy-pink: #f472b6;
+  --color-playful-purple: #a855f7;
+}
+
+@layer base {
+  body {
+    @apply bg-sky-light text-slate-800 overflow-hidden select-none;
+    font-family: var(--font-sans);
+  }
+}
+
+@layer components {
+  .btn-playful {
+    @apply px-8 py-4 rounded-3xl font-extrabold text-2xl transition-all duration-200 active:scale-95 shadow-[0_8px_0_0_rgba(0,0,0,0.1)] hover:shadow-[0_4px_0_0_rgba(0,0,0,0.1)] hover:translate-y-[4px] active:translate-y-[8px] active:shadow-none;
+  }
+  
+  .card-playful {
+    @apply bg-white rounded-3xl p-4 shadow-xl border-4 border-transparent hover:border-sun-yellow transition-all;
+  }
+}
+
+/* Custom animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
